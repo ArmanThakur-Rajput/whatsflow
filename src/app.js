@@ -19,21 +19,41 @@ connectDB();
 app.use(helmet());
 
 // --- CORS: allow only known origins ---
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
-  .split(',')
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
   .map((o) => o.trim())
   .filter(Boolean);
 
 app.use(
   cors({
-    origin(origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error('Not allowed by CORS'));
+    origin: (origin, callback) => {
+      // React Native / Expo Go / Postman
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.log("Blocked Origin:", origin);
+      return callback(new Error(`Origin not allowed: ${origin}`));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+
+
+
+
+
+
+
+
+
 
 // --- Body parsing with size caps ---
 app.use(express.json({ limit: '100kb' }));
